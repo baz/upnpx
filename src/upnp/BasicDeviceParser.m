@@ -41,6 +41,7 @@
 @interface BasicDeviceParser ()
 @property (strong) BasicUPnPDevice *device;
 @property (strong) NSMutableArray* friendlyNameStack;
+@property (strong) NSMutableArray* manufacturerStack;
 @property (strong) NSMutableArray* udnStack;
 @end
 
@@ -96,6 +97,7 @@
     _device = upnpdevice;
 
     _friendlyNameStack = [[NSMutableArray alloc] init];
+    _manufacturerStack = [[NSMutableArray alloc] init];
     _udnStack = [[NSMutableArray alloc] init];
 
     //Device is the root device
@@ -203,7 +205,7 @@
 			//this is our device, copy the collected info to the [device] instance
 			[self.device setUdn:self.udn];
 			[self.device setFriendlyName:self.friendlyName];
-      [self.device setManufacturer:self.manufacturer];
+			[self.device setManufacturer:self.manufacturer];
 		}
 	}
 }
@@ -211,6 +213,7 @@
 - (void)embeddedDevice:(NSString *)startStop {
 	if ([startStop isEqualToString:@"ElementStart"]) {
     [self.friendlyNameStack addObject:self.friendlyName];
+    [self.manufacturerStack addObject:self.manufacturer];
     [self.udnStack addObject:self.udn];
 	} else {
 		//Was this the device we are looking for ?
@@ -219,13 +222,18 @@
 				//this is our device, copy the collected info to the [device] instance
 				[self.device setFriendlyName:self.friendlyName];
 				[self.device setUdn:self.udn];
-        [self.device setManufacturer:self.manufacturer];
+				[self.device setManufacturer:self.manufacturer];
 			}
 		}
-    [self setUdn:[self.udnStack lastObject]];
-    [self setFriendlyName:[self.friendlyNameStack lastObject]];
-    [self.friendlyNameStack removeLastObject];
-    [self.udnStack removeLastObject];
+
+		[self setUdn:[self.udnStack lastObject]];
+		[self.udnStack removeLastObject];
+
+		[self setFriendlyName:[self.friendlyNameStack lastObject]];
+		[self.friendlyNameStack removeLastObject];
+
+		[self setManufacturer:[self.manufacturerStack lastObject]];
+		[self.manufacturerStack removeLastObject];
 	}
 }
 
